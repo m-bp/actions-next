@@ -13,11 +13,13 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: development
-          SLACK_COLOR: 'good' # or a specific color like 'good' or '#ff00ff'
-          SLACK_ICON: https://github.com/rtCamp.png?size=48
-          SLACK_MESSAGE: 'New deployment is coming :rocket:'
-          SLACK_TITLE: New deployment
-          SLACK_USERNAME: rtCamp
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://vixiees.com/android-chrome-192x192.png
+          SLACK_MESSAGE: 'A new deployment is being sent to production'
+          SLACK_TITLE: 'New deployment coming! :rocket:'
+          SLACK_USERNAME: 'GH Actions :robot:'
+          SLACK_FOOTER:
+          MSG_MINIMAL: true
       - name: Deploy to Vercel Action
         uses: BetaHuhn/deploy-to-vercel-action@v1
         with:
