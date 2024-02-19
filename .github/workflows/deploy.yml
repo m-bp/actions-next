@@ -1,15 +1,6 @@
 name: Deploy CI
 on:
   workflow_dispatch:
-    branches:
-      - main
-  schedule:
-  - cron:  '0 8 * * 1' # will run every Monday at 8 am
-  push:
-    branches: [main]
-  pull_request:
-    types: [opened, synchronize, reopened]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,6 +8,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: development
+          SLACK_COLOR: 'good' # or a specific color like 'good' or '#ff00ff'
+          SLACK_ICON: https://github.com/rtCamp.png?size=48
+          SLACK_MESSAGE: 'New deployment is coming :rocket:'
+          SLACK_TITLE: New deployment
+          SLACK_USERNAME: rtCamp
       - name: Deploy to Vercel Action
         uses: BetaHuhn/deploy-to-vercel-action@v1
         with:
