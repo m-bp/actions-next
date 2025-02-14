@@ -22,9 +22,9 @@ jobs:
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: "main-app-staging"
-          HEROKU_TARGET_APP: "main-app"
+          # HEROKU_TARGET_APP: "main-app"
         run: |
-          heroku pipelines:promote --app "$HEROKU_APP_NAME" --to "$HEROKU_TARGET_APP"
+          heroku pipelines:promote --app "$HEROKU_APP_NAME" # --to "$HEROKU_TARGET_APP"
 
       - name: Wait for 5 minutes
         run: sleep 5m
