@@ -1,0 +1,46 @@
+name: "Heroku: promote to production"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
+      - name: Authenticate with Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          heroku auth:token
+
+      - name: Promote to Heroku pipeline
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: "main-app-staging"
+          HEROKU_TARGET_APP: "main-app"
+        run: |
+          heroku pipelines:promote --app "$HEROKU_APP_NAME" --to "$HEROKU_TARGET_APP"
+
+      - name: Wait for 5 minutes
+        run: sleep 5m
+
+      - name: Trigger Workers
+        run: |
+          curl -X POST -H "Accept: application/vnd.github+json" \
+               -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+               -H "Content-Type: application/json" \
+               --data '{"ref":"main"}' \
+               https://api.github.com/repos/${{ github.repository }}/actions/workflows/render.yml/dispatches
+
+      - name: Trigger Sentry
+        run: |
+          curl -X POST -H "Accept: application/vnd.github+json" \
+               -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+               -H "Content-Type: application/json" \
+               --data '{"ref":"main"}' \
+               https://api.github.com/repos/${{ github.repository }}/actions/workflows/sentry.yml/dispatches
