@@ -18,29 +18,42 @@ jobs:
         run: |
           heroku auth:token
 
-      - name: Promote to Heroku pipeline
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
         env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-          HEROKU_APP_NAME: "main-app-staging"
-          # HEROKU_TARGET_APP: "main-app"
-        run: |
-          heroku pipelines:promote --app "$HEROKU_APP_NAME" # --to "$HEROKU_TARGET_APP"
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: development
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://vixiees.com/android-chrome-192x192.png
+          SLACK_TITLE: "Production deployment"
+          SLACK_MESSAGE: "New BE version coming! 🚀"
+          SLACK_USERNAME: "GitHub Actions 🤖"
+          SLACK_FOOTER:
+          MSG_MINIMAL: actions url,commit
 
-      - name: Wait for 5 minutes
-        run: sleep 5m
-
-      - name: Trigger Workers
-        run: |
-          curl -X POST -H "Accept: application/vnd.github+json" \
-               -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
-               -H "Content-Type: application/json" \
-               --data '{"ref":"main"}' \
-               https://api.github.com/repos/${{ github.repository }}/actions/workflows/render.yml/dispatches
-
-      - name: Trigger Sentry
-        run: |
-          curl -X POST -H "Accept: application/vnd.github+json" \
-               -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
-               -H "Content-Type: application/json" \
-               --data '{"ref":"main"}' \
-               https://api.github.com/repos/${{ github.repository }}/actions/workflows/sentry.yml/dispatches
+      # - name: Promote to Heroku pipeline
+      #   env:
+      #     HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      #     HEROKU_APP_NAME: "main-app-staging"
+      #     # HEROKU_TARGET_APP: "main-app"
+      #   run: |
+      #     heroku pipelines:promote --app "$HEROKU_APP_NAME" # --to "$HEROKU_TARGET_APP"
+      #
+      # - name: Wait for 5 minutes
+      #   run: sleep 20s
+      #
+      # - name: Trigger Workers
+      #   run: |
+      #     curl -X POST -H "Accept: application/vnd.github+json" \
+      #          -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+      #          -H "Content-Type: application/json" \
+      #          --data '{"ref":"main"}' \
+      #          https://api.github.com/repos/${{ github.repository }}/actions/workflows/render.yml/dispatches
+      #
+      # - name: Trigger Sentry
+      #   run: |
+      #     curl -X POST -H "Accept: application/vnd.github+json" \
+      #          -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+      #          -H "Content-Type: application/json" \
+      #          --data '{"ref":"main"}' \
+      #          https://api.github.com/repos/${{ github.repository }}/actions/workflows/sentry.yml/dispatches
